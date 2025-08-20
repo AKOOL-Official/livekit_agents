@@ -44,6 +44,7 @@ class AkoolAPI:
         self._api_url = api_url or DEFAULT_API_URL
         self._conn_options = conn_options
         self._session = session or aiohttp.ClientSession()
+        self._access_token = None
 
     async def _get_access_token(self) -> str:
         """
@@ -74,6 +75,7 @@ class AkoolAPI:
             ),
             **self._avatar_config.model_dump(exclude_none=True),
         ).model_dump(exclude_none=True)
+        print(f"create_session payload: {payload}")
         response_data = await self._post(url, payload, need_token=True)
         return response_data["data"]  # type: ignore
 
