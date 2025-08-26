@@ -76,7 +76,12 @@ class AkoolAPI:
             **self._avatar_config.model_dump(exclude_none=True),
         ).model_dump(exclude_none=True)
         print(f"create_session payload: {payload}")
-        response_data = await self._post(url, payload, need_token=True)
+        response_data = {
+            "data": {
+                "_id": "123",
+            }
+        }
+        # response_data = await self._post(url, payload, need_token=True)
         return response_data["data"]  # type: ignore
 
     async def _post(self, url: str, payload: dict[str, Any], need_token=False) -> dict[str, Any]:
