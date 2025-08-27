@@ -98,6 +98,8 @@ class AvatarSession:
                 raise AkoolException("failed to get local participant identity") from e
             local_participant_identity = room.local_participant.identity
 
+        print(f"livekit {local_participant_identity = }, {room.name = }")
+
         livekit_token = (
             api.AccessToken(api_key=livekit_api_key, api_secret=livekit_api_secret)
             .with_kind("agent")
