@@ -14,7 +14,10 @@ load_dotenv()
 
 async def entrypoint(ctx: JobContext):
     session = AgentSession(
-        llm=openai.realtime.RealtimeModel(voice="alloy"),
+        llm=openai.realtime.RealtimeModel(
+            voice="alloy",
+            modalities=["audio"],  # 只输出音频，不输出文本
+        ),
     )
 
     akool_avatar = akool.AvatarSession(
