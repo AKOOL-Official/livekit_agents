@@ -98,7 +98,7 @@ class AvatarSession:
                 raise AkoolException("failed to get local participant identity") from e
             local_participant_identity = room.local_participant.identity
 
-        print(f"livekit {local_participant_identity = }, {room.name = }")
+        logger.info(f"Starting avatar session for participant {local_participant_identity} in room {room.name}")
 
         livekit_token = (
             api.AccessToken(api_key=livekit_api_key, api_secret=livekit_api_secret)
@@ -111,14 +111,19 @@ class AvatarSession:
             .to_jwt()
         )
 
-        logger.debug("starting avatar session")
-        session_detail = await self._api.create_session(
-            livekit_url=livekit_url,
-            livekit_token=livekit_token,
-            livekit_server_identity=livekit_server_identity or local_participant_identity,
-            livekit_client_identity=livekit_client_identity or local_participant_identity,
-        )
-        self.session_id = session_detail["_id"]
+        logger.debug("creating avatar session with akool API")
+        try:
+            session_detail = await self._api.create_session(
+                livekit_url=livekit_url,
+                livekit_token=livekit_token,
+                livekit_server_identity=livekit_server_identity or local_participant_identity,
+                livekit_client_identity=livekit_client_identity or local_participant_identity,
+            )
+            self.session_id = session_detail["_id"]
+            logger.info(f"Avatar session created successfully, session_id: {self.session_id}")
+        except AkoolException as e:
+            logger.error(f"Failed to create avatar session: {e}")
+            raise
 
         agent_session.output.audio = DataStreamAudioOutput(
             room=room,
