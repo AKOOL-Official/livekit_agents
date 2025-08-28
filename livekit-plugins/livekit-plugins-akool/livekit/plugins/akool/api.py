@@ -59,9 +59,7 @@ class AkoolAPI:
         logger.info(f"get_access_token response: {response_data}")
         return response_data["token"]
 
-    async def create_session(
-        self, livekit_url: str, livekit_token: str, livekit_server_identity: str, livekit_client_identity: str
-    ) -> str:
+    async def create_session(self, livekit_url: str, livekit_token: str) -> str:
         if not self._access_token:
             self._access_token = await self._get_access_token()
 
@@ -71,8 +69,6 @@ class AkoolAPI:
             credentials=Credentials(
                 livekit_url=livekit_url,
                 livekit_token=livekit_token,
-                livekit_server_identity=livekit_server_identity,
-                livekit_client_identity=livekit_client_identity,
             ),
             **self._avatar_config.model_dump(exclude_none=True),
         ).model_dump(exclude_none=True)

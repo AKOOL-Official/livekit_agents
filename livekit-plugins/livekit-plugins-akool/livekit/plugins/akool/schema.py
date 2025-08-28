@@ -13,8 +13,6 @@ class ModeType(int, Enum):
 class Credentials(BaseModel):
     livekit_url: str = Field(default=os.getenv("LIVEKIT_URL"), description="Livekit URL")
     livekit_token: str = Field(default=os.getenv("LIVEKIT_TOKEN"), description="Livekit token")
-    livekit_server_identity: Optional[str] = Field(default=None, description="used for receive video and audio")
-    livekit_client_identity: Optional[str] = Field(default=None, description="used for send video and audio")
 
 
 class VoiceSettings(BaseModel):
