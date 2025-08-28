@@ -56,6 +56,7 @@ class AkoolAPI:
         response_data = await self._post(url, payload)
         if response_data["code"] != 1000:
             raise AkoolException(f"failed to get access token, error code: {response_data['code']}")
+        logger.info(f"get_access_token response: {response_data}")
         return response_data["token"]
 
     async def create_session(
@@ -78,18 +79,6 @@ class AkoolAPI:
         logger.info(f"create_session payload: {payload}")
         response_data = await self._post(url, payload, need_token=True)
         logger.info(f"create_session response: {response_data}")
-
-        # 检查响应是否包含错误
-        if "code" in response_data and response_data["code"] != 1000:
-            error_msg = response_data.get("msg", f"Unknown error, code: {response_data['code']}")
-            logger.error(f"create_session failed: {error_msg}")
-            raise AkoolException(f"Failed to create avatar session: {error_msg}")
-
-        # 检查是否有data字段
-        if "data" not in response_data:
-            logger.error(f"create_session response missing 'data' field: {response_data}")
-            raise AkoolException("Invalid response format: missing 'data' field")
-
         return response_data["data"]  # type: ignore
 
     async def _post(self, url: str, payload: dict[str, Any], need_token=False) -> dict[str, Any]:
