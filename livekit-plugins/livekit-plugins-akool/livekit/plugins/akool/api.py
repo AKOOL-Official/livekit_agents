@@ -77,6 +77,7 @@ class AkoolAPI:
         ).model_dump(exclude_none=True)
         logger.info(f"create_session payload: {payload}")
         response_data = await self._post(url, payload, need_token=True)
+        logger.info(f"create_session response: {response_data}")
         return response_data["data"]  # type: ignore
 
     async def _post(self, url: str, payload: dict[str, Any], need_token=False) -> dict[str, Any]:
