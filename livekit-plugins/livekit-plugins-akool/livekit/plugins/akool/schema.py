@@ -13,12 +13,8 @@ class ModeType(int, Enum):
 class Credentials(BaseModel):
     livekit_url: str = Field(default=os.getenv("LIVEKIT_URL"), description="Livekit URL")
     livekit_token: str = Field(default=os.getenv("LIVEKIT_TOKEN"), description="Livekit token")
-    livekit_receive_identity: str = Field(
-        default="user", description="Livekit receive identity, used for receive video and audio"
-    )
-    livekit_send_identity: str = Field(
-        default="user", description="Livekit send identity, used for send video and audio"
-    )
+    livekit_server_identity: Optional[str] = Field(default=None, description="used for receive video and audio")
+    livekit_client_identity: Optional[str] = Field(default=None, description="used for send video and audio")
 
 
 class VoiceSettings(BaseModel):
@@ -36,9 +32,9 @@ class AvatarConfig(BaseModel):
     mode_type: ModeType = Field(default=ModeType.DIALOGUE, description="1: Retelling, 2: Dialogue")
     background_url: Optional[str] = Field(default=None, description="Background image URL")
     voice_params: Optional[VoiceSettings] = Field(default=None, description="Voice parameters")
-    scene_model: Literal["meeting"] = Field(
+    scene_mode: Literal["meeting"] = Field(
         default="meeting",
-        description="Scene model, receive audio and only do lipsync, then send audio and video",
+        description="Scene mode, receive audio and only do lipsync, then send audio and video",
     )
 
 

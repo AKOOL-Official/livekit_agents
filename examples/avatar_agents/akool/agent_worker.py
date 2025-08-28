@@ -2,6 +2,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from openai.types.beta.realtime.session import TurnDetection
 
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, WorkerType, cli
 from livekit.plugins import openai, akool
@@ -16,7 +17,14 @@ async def entrypoint(ctx: JobContext):
     session = AgentSession(
         llm=openai.realtime.RealtimeModel(
             voice="alloy",
-            modalities=["audio"],  # 只输出音频，不输出文本
+            turn_detection=TurnDetection(
+                type="server_vad",
+                threshold=0.5,
+                prefix_padding_ms=300,
+                silence_duration_ms=500,
+                create_response=True,
+                interrupt_response=False,
+            ),
         ),
     )
 

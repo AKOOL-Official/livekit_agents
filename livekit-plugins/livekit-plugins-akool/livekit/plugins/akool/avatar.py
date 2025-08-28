@@ -78,8 +78,8 @@ class AvatarSession:
         livekit_url: NotGivenOr[str] = NOT_GIVEN,
         livekit_api_key: NotGivenOr[str] = NOT_GIVEN,
         livekit_api_secret: NotGivenOr[str] = NOT_GIVEN,
-        livekit_receive_identity: NotGivenOr[str] = NOT_GIVEN,
-        livekit_send_identity: NotGivenOr[str] = NOT_GIVEN,
+        livekit_server_identity: NotGivenOr[str] = NOT_GIVEN,
+        livekit_client_identity: NotGivenOr[str] = NOT_GIVEN,
     ) -> None:
         livekit_url = livekit_url or (os.getenv("LIVEKIT_URL") or NOT_GIVEN)
         livekit_api_key = livekit_api_key or (os.getenv("LIVEKIT_API_KEY") or NOT_GIVEN)
@@ -115,8 +115,8 @@ class AvatarSession:
         session_detail = await self._api.create_session(
             livekit_url=livekit_url,
             livekit_token=livekit_token,
-            livekit_receive_identity=livekit_receive_identity or local_participant_identity,
-            livekit_send_identity=livekit_send_identity or local_participant_identity,
+            livekit_server_identity=livekit_server_identity or local_participant_identity,
+            livekit_client_identity=livekit_client_identity or local_participant_identity,
         )
         self.session_id = session_detail["_id"]
 

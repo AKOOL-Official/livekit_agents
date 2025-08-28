@@ -59,7 +59,7 @@ class AkoolAPI:
         return response_data["token"]
 
     async def create_session(
-        self, livekit_url: str, livekit_token: str, livekit_receive_identity: str, livekit_send_identity: str
+        self, livekit_url: str, livekit_token: str, livekit_server_identity: str, livekit_client_identity: str
     ) -> str:
         if not self._access_token:
             self._access_token = await self._get_access_token()
@@ -70,18 +70,13 @@ class AkoolAPI:
             credentials=Credentials(
                 livekit_url=livekit_url,
                 livekit_token=livekit_token,
-                livekit_receive_identity=livekit_receive_identity,
-                livekit_send_identity=livekit_send_identity,
+                livekit_server_identity=livekit_server_identity,
+                livekit_client_identity=livekit_client_identity,
             ),
             **self._avatar_config.model_dump(exclude_none=True),
         ).model_dump(exclude_none=True)
-        print(f"create_session payload: {payload}")
-        response_data = {
-            "data": {
-                "_id": "123",
-            }
-        }
-        # response_data = await self._post(url, payload, need_token=True)
+        logger.info(f"create_session payload: {payload}")
+        response_data = await self._post(url, payload, need_token=True)
         return response_data["data"]  # type: ignore
 
     async def _post(self, url: str, payload: dict[str, Any], need_token=False) -> dict[str, Any]:
