@@ -64,6 +64,9 @@ class AvatarSession:
         self._avatar_participant_identity = avatar_participant_identity or _AVATAR_AGENT_IDENTITY
         self._avatar_participant_name = avatar_participant_name or _AVATAR_AGENT_NAME
 
+    def get_avatar_participant_identity(self) -> str:
+        return self._avatar_participant_identity
+
     def _ensure_http_session(self) -> aiohttp.ClientSession:
         if self._http_session is None:
             self._http_session = utils.http_context.http_session()
@@ -127,3 +130,30 @@ class AvatarSession:
             sample_rate=SAMPLE_RATE,
             wait_remote_track=rtc.TrackKind.KIND_VIDEO,
         )
+
+    async def aclose(self) -> None:
+        """
+        关闭 Avatar 会话并清理资源
+        Close avatar session and cleanup resources
+        """
+        logger.info(f"Closing avatar session: {self.session_id}")
+
+        # 如果有会话 ID，尝试调用关闭接口
+        if self.session_id and self._api:
+            try:
+                await self._api.close_session(self.session_id)
+            except Exception as e:
+                logger.warning(f"Failed to close avatar session: {e}")
+
+        # 关闭 HTTP 会话
+        if self._http_session:
+            try:
+                await self._http_session.close()
+            except Exception as e:
+                logger.warning(f"Failed to close http session: {e}")
+            finally:
+                self._http_session = None
+
+        # 重置会话 ID
+        self.session_id = None
+        logger.info("Avatar session closed successfully")

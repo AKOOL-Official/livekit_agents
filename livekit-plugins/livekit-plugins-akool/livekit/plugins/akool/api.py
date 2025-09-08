@@ -49,7 +49,7 @@ class AkoolAPI:
     async def _get_access_token(self) -> str:
         """
         Get an access token from the Akool API.
-        https://docs.akool.com/ai-tools-suite/live-avatar#create-session
+        https://docs.akool.com/authentication/usage
         """
         url = f"{self._api_url}/v3/getToken"
         payload = {"clientId": self._client_id, "clientSecret": self._client_secret}
@@ -60,9 +60,9 @@ class AkoolAPI:
         return response_data["token"]
 
     async def create_session(self, livekit_url: str, livekit_token: str) -> str:
-        if not self._access_token:
-            self._access_token = await self._get_access_token()
-
+        """
+        https://docs.akool.com/ai-tools-suite/live-avatar#create-session
+        """
         url = f"{self._api_url}/v4/liveAvatar/session/create"
         payload = CreateSessionRequest(
             stream_type="livekit",
@@ -76,6 +76,17 @@ class AkoolAPI:
         response_data = await self._post(url, payload, need_token=True)
         logger.info(f"create_session response: {response_data}")
         return response_data["data"]  # type: ignore
+
+    async def close_session(self, session_id: str) -> None:
+        """
+        Close avatar session
+        https://docs.akool.com/ai-tools-suite/live-avatar#close-session
+        """
+        url = f"{self._api_url}/v4/liveAvatar/session/close"
+        payload = {"session_id": session_id}
+        logger.info(f"close_session payload: {payload}")
+        response_data = await self._post(url, payload, need_token=True)
+        logger.info(f"close_session response: {response_data}")
 
     async def _post(self, url: str, payload: dict[str, Any], need_token=False) -> dict[str, Any]:
         """
@@ -94,7 +105,7 @@ class AkoolAPI:
         headers = {"Content-Type": "application/json"}
         if need_token:
             if not self._access_token:
-                raise AkoolException("access token is not set")
+                self._access_token = await self._get_access_token()
             headers["Authorization"] = f"Bearer {self._access_token}"
 
         for i in range(self._conn_options.max_retry):
