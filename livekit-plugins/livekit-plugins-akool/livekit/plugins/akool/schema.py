@@ -13,6 +13,7 @@ class ModeType(int, Enum):
 class Credentials(BaseModel):
     livekit_url: str = Field(default=os.getenv("LIVEKIT_URL"), description="Livekit URL")
     livekit_token: str = Field(default=os.getenv("LIVEKIT_TOKEN"), description="Livekit token")
+    audio_only_from_data_stream: bool = Field(default=True, description="Whether to only publish audio from the data stream")
 
 
 class VoiceSettings(BaseModel):
