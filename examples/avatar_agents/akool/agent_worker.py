@@ -66,9 +66,6 @@ async def entrypoint(ctx: JobContext):
         await session.start(
             agent=Agent(instructions="Talk to me!"),
             room=ctx.room,
-            room_input_options=RoomInputOptions(
-                pre_connect_audio=False,
-            ),
         )
 
         session.generate_reply(instructions="say hello to the user")
