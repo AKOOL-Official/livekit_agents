@@ -5,7 +5,15 @@ import asyncio
 from dotenv import load_dotenv
 from openai.types.beta.realtime.session import TurnDetection
 
-from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, WorkerType, cli
+from livekit.agents import (
+    Agent,
+    AgentSession,
+    JobContext,
+    RoomInputOptions,
+    WorkerOptions,
+    WorkerType,
+    cli,
+)
 from livekit.plugins import openai, akool
 from livekit import rtc
 
@@ -21,11 +29,11 @@ async def entrypoint(ctx: JobContext):
             voice="alloy",
             turn_detection=TurnDetection(
                 type="server_vad",
-                threshold=0.5,
-                prefix_padding_ms=300,
-                silence_duration_ms=500,
+                threshold=0.7,
+                prefix_padding_ms=200,
+                silence_duration_ms=800,
                 create_response=True,
-                interrupt_response=False,
+                interrupt_response=True,
             ),
         ),
     )
@@ -58,6 +66,9 @@ async def entrypoint(ctx: JobContext):
         await session.start(
             agent=Agent(instructions="Talk to me!"),
             room=ctx.room,
+            room_input_options=RoomInputOptions(
+                pre_connect_audio=False,
+            ),
         )
 
         session.generate_reply(instructions="say hello to the user")
