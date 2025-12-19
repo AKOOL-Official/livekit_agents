@@ -19,13 +19,11 @@ See https://docs.livekit.io/agents/integrations/avatar/akool/ for more informati
 
 from .api import AkoolException
 from .avatar import AvatarSession
-from .schema import AvatarConfig
 from .version import __version__
 
 __all__ = [
     "AkoolException",
     "AvatarSession",
-    "AvatarConfig",
     "__version__",
 ]
 

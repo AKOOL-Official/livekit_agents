@@ -15,6 +15,7 @@ from livekit.agents import (
     cli,
 )
 from livekit.plugins import akool, openai
+from livekit.plugins.akool.schema import SourceData
 
 logger = logging.getLogger("akool-avatar-example")
 logger.setLevel(logging.INFO)
@@ -25,12 +26,13 @@ load_dotenv()
 async def entrypoint(ctx: JobContext):
     session = AgentSession(
         llm=openai.realtime.RealtimeModel(
+            model="gpt-4o-realtime-preview",
             voice="alloy",
             turn_detection=TurnDetection(
                 type="server_vad",
                 threshold=0.7,
-                prefix_padding_ms=200,
-                silence_duration_ms=800,
+                prefix_padding_ms=300,
+                silence_duration_ms=1000,
                 create_response=True,
                 interrupt_response=True,
             ),
@@ -38,14 +40,18 @@ async def entrypoint(ctx: JobContext):
     )
 
     akool_avatar = akool.AvatarSession(
-        avatar_config=akool.AvatarConfig(avatar_id="dvp_Tristan_cloth2_1080P"),
-        client_id=os.getenv("AKOOL_CLIENT_ID"),
-        client_secret=os.getenv("AKOOL_CLIENT_SECRET"),
-        api_url=os.getenv("AKOOL_API_URL"),
+        avatar_id=os.getenv("AKOOL_AVATAR_ID", "dvp_Tristan_cloth2_1080P"),
+    )
+
+    source_data = SourceData(
+        voice_id="690c93c10274695d7c5e5ed4",
+        language="en",
+        mode_type=2,
     )
 
     try:
-        await akool_avatar.start(session, room=ctx.room)
+        logger.info(f"Starting avatar session for room {ctx.room.name}")
+        await akool_avatar.start(session, room=ctx.room, source_data=source_data)
 
         # 监听用户断开连接事件
         def on_participant_disconnected(participant: rtc.RemoteParticipant):

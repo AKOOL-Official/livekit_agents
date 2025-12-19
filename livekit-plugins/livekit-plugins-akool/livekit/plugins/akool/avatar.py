@@ -19,14 +19,11 @@ from livekit.agents.voice.room_io import ATTRIBUTE_PUBLISH_ON_BEHALF
 
 from .api import AkoolAPI, AkoolException
 from .log import logger
-from .schema import AvatarConfig
+from .schema import Credentials, SourceData
 
 SAMPLE_RATE = 16000
 _AVATAR_AGENT_IDENTITY = "akool-avatar-agent"
 _AVATAR_AGENT_NAME = "akool-avatar-agent"
-
-DEFAULT_AVATAR_CONFIG = AvatarConfig()
-
 
 class AvatarSession:
     """A Akool avatar session"""
@@ -34,10 +31,7 @@ class AvatarSession:
     def __init__(
         self,
         *,
-        avatar_config: AvatarConfig = DEFAULT_AVATAR_CONFIG,
-        client_id: NotGivenOr[str] = NOT_GIVEN,
-        client_secret: NotGivenOr[str] = NOT_GIVEN,
-        api_url: NotGivenOr[str] = NOT_GIVEN,
+        avatar_id: str = os.getenv("AKOOL_AVATAR_ID", "dvp_Tristan_cloth2_1080P"),
         avatar_participant_identity: NotGivenOr[str] = NOT_GIVEN,
         avatar_participant_name: NotGivenOr[str] = NOT_GIVEN,
         conn_options: APIConnectOptions = DEFAULT_API_CONNECT_OPTIONS,
@@ -45,18 +39,10 @@ class AvatarSession:
         self._http_session: aiohttp.ClientSession | None = None
         self._conn_options = conn_options
         self.session_id: str | None = None
-        self._avatar_config = avatar_config
-
-        self._client_id = client_id or os.getenv("AKOOL_CLIENT_ID")
-        self._client_secret = client_secret or os.getenv("AKOOL_CLIENT_SECRET")
-        if not self._client_id or not self._client_secret:
-            raise AkoolException("AKOOL_CLIENT_ID and AKOOL_CLIENT_SECRET must be set")
+        self._avatar_id = avatar_id
 
         self._api = AkoolAPI(
-            avatar_config=self._avatar_config,
-            client_id=self._client_id,
-            client_secret=self._client_secret,
-            api_url=api_url,
+            avatar_id=self._avatar_id,
             conn_options=conn_options,
             session=self._ensure_http_session(),
         )
@@ -81,6 +67,7 @@ class AvatarSession:
         livekit_url: NotGivenOr[str] = NOT_GIVEN,
         livekit_api_key: NotGivenOr[str] = NOT_GIVEN,
         livekit_api_secret: NotGivenOr[str] = NOT_GIVEN,
+        source_data: NotGivenOr[SourceData] = NOT_GIVEN,
     ) -> None:
         livekit_url = livekit_url or (os.getenv("LIVEKIT_URL") or NOT_GIVEN)
         livekit_api_key = livekit_api_key or (os.getenv("LIVEKIT_API_KEY") or NOT_GIVEN)
@@ -116,11 +103,13 @@ class AvatarSession:
 
         logger.debug("creating avatar session with akool API")
         try:
-            session_detail = await self._api.create_session(
-                livekit_url=livekit_url,
-                livekit_token=livekit_token,
+            credentials = Credentials(livekit_url=livekit_url, livekit_token=livekit_token)
+            session_id = await self._api.create_session(
+                credentials=credentials,
+                source_data=source_data if utils.is_given(source_data) else None,
+                avatar_id=self._avatar_id,
             )
-            self.session_id = session_detail["_id"]
+            self.session_id = session_id
             logger.info(f"Avatar session created successfully, session_id: {self.session_id}")
         except AkoolException as e:
             logger.error(f"Failed to create avatar session: {e}")
