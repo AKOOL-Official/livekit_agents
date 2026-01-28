@@ -18,6 +18,7 @@ See https://docs.livekit.io/agents/integrations/avatar/akool/ for more informati
 """
 
 from .api import AkoolException
+from .audio_output import AvatarTrackAudioOutput
 from .avatar import AvatarSession
 from .schema import AvatarConfig
 from .version import __version__
@@ -25,6 +26,7 @@ from .version import __version__
 __all__ = [
     "AkoolException",
     "AvatarSession",
+    "AvatarTrackAudioOutput",
     "AvatarConfig",
     "__version__",
 ]

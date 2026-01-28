@@ -14,10 +14,10 @@ from livekit.agents import (
     get_job_context,
     utils,
 )
-from livekit.agents.voice.avatar import DataStreamAudioOutput
 from livekit.agents.voice.room_io import ATTRIBUTE_PUBLISH_ON_BEHALF
 
 from .api import AkoolAPI, AkoolException
+from .audio_output import AvatarTrackAudioOutput
 from .log import logger
 from .schema import AvatarConfig
 
@@ -63,6 +63,7 @@ class AvatarSession:
 
         self._avatar_participant_identity = avatar_participant_identity or _AVATAR_AGENT_IDENTITY
         self._avatar_participant_name = avatar_participant_name or _AVATAR_AGENT_NAME
+        self._audio_output: AvatarTrackAudioOutput | None = None
 
     def get_avatar_participant_identity(self) -> str:
         return self._avatar_participant_identity
@@ -99,9 +100,7 @@ class AvatarSession:
                 raise AkoolException("failed to get local participant identity") from e
             local_participant_identity = room.local_participant.identity
 
-        logger.info(
-            f"Starting avatar session for participant {local_participant_identity} in room {room.name}"
-        )
+        logger.info(f"Starting avatar session for participant {local_participant_identity} in room {room.name}")
 
         livekit_token = (
             api.AccessToken(api_key=livekit_api_key, api_secret=livekit_api_secret)
@@ -126,12 +125,15 @@ class AvatarSession:
             logger.error(f"Failed to create avatar session: {e}")
             raise
 
-        agent_session.output.audio = DataStreamAudioOutput(
+        self._audio_output = AvatarTrackAudioOutput(
             room=room,
             destination_identity=self._avatar_participant_identity,
             sample_rate=SAMPLE_RATE,
+            num_channels=1,
+            track_name="akool_avatar_audio",
             wait_remote_track=rtc.TrackKind.KIND_VIDEO,
         )
+        agent_session.output.audio = self._audio_output
 
     async def aclose(self) -> None:
         """
@@ -139,6 +141,15 @@ class AvatarSession:
         Close avatar session and cleanup resources
         """
         logger.info(f"Closing avatar session: {self.session_id}")
+
+        # 关闭音频输出
+        if self._audio_output:
+            try:
+                await self._audio_output.aclose()
+            except Exception as e:
+                logger.warning(f"Failed to close audio output: {e}")
+            finally:
+                self._audio_output = None
 
         # 如果有会话 ID，尝试调用关闭接口
         if self.session_id and self._api:
