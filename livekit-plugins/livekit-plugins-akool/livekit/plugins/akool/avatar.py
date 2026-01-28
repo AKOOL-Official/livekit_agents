@@ -14,12 +14,12 @@ from livekit.agents import (
     get_job_context,
     utils,
 )
-from livekit.agents.voice.avatar import DataStreamAudioOutput
 from livekit.agents.voice.room_io import ATTRIBUTE_PUBLISH_ON_BEHALF
 
 from .api import AkoolAPI, AkoolException
 from .log import logger
 from .schema import AvatarConfig
+from .data_stream import ChunkDataStreamAudioOutput
 
 SAMPLE_RATE = 16000
 _AVATAR_AGENT_IDENTITY = "akool-avatar-agent"
@@ -99,9 +99,7 @@ class AvatarSession:
                 raise AkoolException("failed to get local participant identity") from e
             local_participant_identity = room.local_participant.identity
 
-        logger.info(
-            f"Starting avatar session for participant {local_participant_identity} in room {room.name}"
-        )
+        logger.info(f"Starting avatar session for participant {local_participant_identity} in room {room.name}")
 
         livekit_token = (
             api.AccessToken(api_key=livekit_api_key, api_secret=livekit_api_secret)
@@ -126,7 +124,7 @@ class AvatarSession:
             logger.error(f"Failed to create avatar session: {e}")
             raise
 
-        agent_session.output.audio = DataStreamAudioOutput(
+        agent_session.output.audio = ChunkDataStreamAudioOutput(
             room=room,
             destination_identity=self._avatar_participant_identity,
             sample_rate=SAMPLE_RATE,
