@@ -14,7 +14,7 @@ from livekit.agents import (
 )
 
 from .log import logger
-from .schema import AvatarConfig, CreateSessionRequest, Credentials
+from .schema import AudioInputSource, AvatarConfig, CreateSessionRequest, Credentials
 
 
 class AkoolException(Exception):
@@ -58,7 +58,13 @@ class AkoolAPI:
         logger.info(f"get_access_token response: {response_data}")
         return response_data["token"]
 
-    async def create_session(self, livekit_url: str, livekit_token: str) -> str:
+    async def create_session(
+        self,
+        livekit_url: str,
+        livekit_token: str,
+        input_source: AudioInputSource = AudioInputSource.DATA_STREAM,
+        publisher_identity: Optional[str] = None,
+    ) -> str:
         """
         https://docs.akool.com/ai-tools-suite/live-avatar#create-session
         """
@@ -68,6 +74,8 @@ class AkoolAPI:
             credentials=Credentials(
                 livekit_url=livekit_url,
                 livekit_token=livekit_token,
+                audio_input_source=input_source,
+                audio_publisher_identity=publisher_identity,
             ),
             **self._avatar_config.model_dump(exclude_none=True),
         ).model_dump(exclude_none=True)
@@ -117,9 +125,7 @@ class AkoolAPI:
                 ) as response:
                     if not response.ok:
                         text = await response.text()
-                        raise APIStatusError(
-                            "Server returned an error", status_code=response.status, body=text
-                        )
+                        raise APIStatusError("Server returned an error", status_code=response.status, body=text)
                     return await response.json()  # type: ignore
             except Exception as e:
                 if isinstance(e, APIConnectionError):

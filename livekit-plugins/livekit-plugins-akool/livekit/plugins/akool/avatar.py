@@ -19,7 +19,7 @@ from livekit.agents.voice.room_io import ATTRIBUTE_PUBLISH_ON_BEHALF
 from .api import AkoolAPI, AkoolException
 from .audio_output import AvatarTrackAudioOutput
 from .log import logger
-from .schema import AvatarConfig
+from .schema import AudioInputSource, AvatarConfig
 
 SAMPLE_RATE = 16000
 _AVATAR_AGENT_IDENTITY = "akool-avatar-agent"
@@ -118,6 +118,8 @@ class AvatarSession:
             session_detail = await self._api.create_session(
                 livekit_url=livekit_url,
                 livekit_token=livekit_token,
+                input_source=AudioInputSource.AUDIO_TRACK,
+                publisher_identity=local_participant_identity,
             )
             self.session_id = session_detail["_id"]
             logger.info(f"Avatar session created successfully, session_id: {self.session_id}")
