@@ -10,19 +10,29 @@ class ModeType(int, Enum):
     DIALOGUE = 2
 
 
+class AudioInputSource(str, Enum):
+    """音频输入源类型 / Audio input source type"""
+
+    DATA_STREAM = "data_stream"  # 从 data stream 接收音频
+    AUDIO_TRACK = "audio_track"  # 从 audio track 接收音频
+
+
 class Credentials(BaseModel):
     livekit_url: str = Field(default=os.getenv("LIVEKIT_URL"), description="Livekit URL")
     livekit_token: str = Field(default=os.getenv("LIVEKIT_TOKEN"), description="Livekit token")
-    audio_only_from_data_stream: bool = Field(
-        default=True, description="Whether to only publish audio from the data stream"
+    audio_input_source: AudioInputSource = Field(
+        default=AudioInputSource.DATA_STREAM,
+        description="Audio input source type: data_stream or audio_track",
+    )
+    audio_publisher_identity: Optional[str] = Field(
+        default=None,
+        description="Identity of the audio publisher to subscribe to (only used when audio_input_source=AUDIO_TRACK)",
     )
 
 
 class VoiceSettings(BaseModel):
     speed: Optional[float] = Field(default=None, description="Speed of the voice")
-    pron_map: Optional[dict[str, str]] = Field(
-        default=None, description="Pronunciation map for the voice"
-    )
+    pron_map: Optional[dict[str, str]] = Field(default=None, description="Pronunciation map for the voice")
 
 
 class AvatarConfig(BaseModel):

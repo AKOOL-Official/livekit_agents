@@ -125,6 +125,15 @@ class AvatarSession:
             logger.error(f"Failed to create avatar session: {e}")
             raise
 
+        # 使用 DataStreamAudioOutput 实现音频输出
+        # agent_session.output.audio = DataStreamAudioOutput(
+        #     room=room,
+        #     destination_identity=self._avatar_participant_identity,
+        #     sample_rate=SAMPLE_RATE,
+        #     wait_remote_track=rtc.TrackKind.KIND_VIDEO,
+        # )
+
+        # 使用 AvatarTrackAudioOutput 实现音频输出
         self._audio_output = AvatarTrackAudioOutput(
             room=room,
             destination_identity=self._avatar_participant_identity,
